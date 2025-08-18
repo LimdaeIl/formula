@@ -15,8 +15,21 @@ services:
     networks:
       - formula-network
 
+  redis:
+    image: redis:8.0
+    container_name: formula-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
+    networks:
+      - formula-network
+
 volumes:
   formula-mysql-data:
+  redis-data:
 
 networks:
-    formula-network:
+  formula-network:
