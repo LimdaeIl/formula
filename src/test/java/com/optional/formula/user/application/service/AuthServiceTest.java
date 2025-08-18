@@ -99,7 +99,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("중복 이메일이면 예외가 발생한다.")
+    @DisplayName("회원가입 시 중복 이메일이면 예외가 발생한다.")
     void signUp_fail_by_duplicate_email() {
         // given
         given(userRepository.existsByEmail(signUpRequest.email())).willReturn(true);
@@ -116,7 +116,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("비밀번호 불일치 시 로그인 실패한다.")
+    @DisplayName("로그인 시 비밀번호 불일치 시 로그인 실패한다.")
     void signIn_fail_wrong_password() {
         // given
         given(userRepository.findByEmail(email)).willReturn(Optional.of(testUser));
@@ -222,7 +222,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("요청 RT와 저장된 RT가 다르면 재발급 실패 예외가 발생한다.")
+    @DisplayName("토큰 재발급 시 요청 RT와 저장된 RT가 다르면 재발급 실패 예외가 발생한다.")
     void reissueToken_fail_by_mismatched_refresh_token() {
         // given
         String wrongRefreshToken = "invalid-refresh-token";
