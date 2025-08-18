@@ -53,7 +53,7 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("reissue-token")
+    @PostMapping("/reissue-token")
     public ResponseEntity<ReissueTokenResponse> reissueToken(
             @RequestHeader("Authorization") String accessToken,
             @RequestBody ReissueTokenRequest request

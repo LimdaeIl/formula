@@ -10,7 +10,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.persistence.Table;
 import java.security.Key;
 import java.util.Date;
 import javax.crypto.SecretKey;
