@@ -38,6 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.error("Unhandled Exception: [{}] {}", e.getClass().getName(), e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of(CommonErrorCode.INTERNAL_SERVER_ERROR, e));
