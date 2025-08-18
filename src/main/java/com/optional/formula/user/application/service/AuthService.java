@@ -21,11 +21,6 @@ public class AuthService implements AuthUseCase {
     private final PasswordEncoder passwordEncoder;
     private final Snowflake snowflake = new Snowflake();
 
-    private void findByEmail(String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_EMAIL_DUPLICATED));
-    }
-
     private void existsByEmail(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new UserException(UserErrorCode.USER_EMAIL_DUPLICATED);
@@ -47,6 +42,4 @@ public class AuthService implements AuthUseCase {
 
         return SignUpResponse.from(user);
     }
-
-
 }
