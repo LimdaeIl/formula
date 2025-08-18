@@ -1,1 +1,29 @@
-spring.application.name=formula
+spring:
+  application:
+    name: formula-service
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations:
+      - classpath:db/migration
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${RDS_USERNAME:local}
+    password: ${RDS_PASSWORD:local}
+    url: jdbc:mysql://${RDS_ENDPOINT:localhost}:3307/formula?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&useSSL=false&rewriteBatchedStatements=true
+    hikari:
+      maximum-pool-size: 32
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        open-in-view: false
