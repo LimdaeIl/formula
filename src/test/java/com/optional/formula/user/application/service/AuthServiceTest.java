@@ -11,6 +11,8 @@ import com.optional.formula.user.application.dto.request.SignUpRequest;
 import com.optional.formula.user.application.dto.response.SignUpResponse;
 import com.optional.formula.user.domain.entity.User;
 import com.optional.formula.user.domain.repository.UserRepository;
+import com.optional.formula.user.exception.UserErrorCode;
+import com.optional.formula.user.exception.UserException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +42,6 @@ class AuthServiceTest {
     void setUp() {
         signUpRequest = SignUpRequest.builder()
                 .email("test@example.com")
-                .name("test")
                 .password("test-password-123")
                 .nickname("testNickname1")
                 .build();
@@ -61,7 +62,7 @@ class AuthServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.email()).isEqualTo("test@example.com");
-        assertThat(response.name()).isEqualTo("test");
+        assertThat(response.nickname()).isEqualTo("testNickname1");
 
         // verify
         verify(userRepository).existsByEmail(signUpRequest.email());
@@ -77,8 +78,8 @@ class AuthServiceTest {
 
         // when
         assertThatThrownBy(() -> authService.signUp(signUpRequest))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이메일: 이미 존재하는 이메일입니다.");
+                .isInstanceOf(UserException.class)
+                .hasMessage(UserErrorCode.USER_EMAIL_DUPLICATED.getMessage());
 
         // verify
         verify(userRepository).existsByEmail(signUpRequest.email());

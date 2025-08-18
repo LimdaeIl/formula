@@ -27,9 +27,6 @@ public class User {
     @Column(name = "password", nullable = false, length = 512)
     private String password;
 
-    @Column(name = "name", nullable = false, length = 10)
-    private String name;
-
     @Column(name = "nickname")
     private String nickname;
 
@@ -46,11 +43,10 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    private User(Long userId, String email, String password, String name, String nickname) {
+    private User(Long userId, String email, String password, String nickname) {
         this.userId = userId;
         this.email = email;
         this.password = password;
-        this.name = name;
         this.nickname = nickname;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = null;
@@ -60,9 +56,8 @@ public class User {
             Long userId,
             String email,
             String password,
-            String name,
             String nickname) {
-        return new User(userId, email, password, name, nickname);
+        return new User(userId, email, password, nickname);
     }
 
     public void updatePassword(String newPassword) {

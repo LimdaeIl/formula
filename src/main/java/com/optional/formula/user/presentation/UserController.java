@@ -4,6 +4,7 @@ import com.optional.formula.user.application.dto.request.UpdatePasswordUserReque
 import com.optional.formula.user.application.dto.response.GetUserResponse;
 import com.optional.formula.user.application.dto.response.UpdatePasswordUserResponse;
 import com.optional.formula.user.application.usecase.UserUseCase;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class UserController {
     @PatchMapping("/{userId}/password")
     public ResponseEntity<UpdatePasswordUserResponse> updatePasswordUser(
             @PathVariable Long userId,
-            @RequestBody UpdatePasswordUserRequest request
+            @Valid @RequestBody UpdatePasswordUserRequest request
     ) {
         UpdatePasswordUserResponse response = userUseCase.updateUserPassword(userId, request);
 

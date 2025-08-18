@@ -6,6 +6,8 @@ import com.optional.formula.user.application.dto.response.UpdatePasswordUserResp
 import com.optional.formula.user.application.usecase.UserUseCase;
 import com.optional.formula.user.domain.entity.User;
 import com.optional.formula.user.domain.repository.UserRepository;
+import com.optional.formula.user.exception.UserErrorCode;
+import com.optional.formula.user.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class UserService implements UserUseCase {
 
     private User findById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("userId: 존재하지 않는 userId입니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
 
     @Override
@@ -30,7 +32,6 @@ public class UserService implements UserUseCase {
         return GetUserResponse.builder()
                 .userId(userId)
                 .email(user.getEmail())
-                .name(user.getName())
                 .nickname(user.getNickname())
                 .userRole(user.getUserRole())
                 .isDelete(user.getIsDelete())
@@ -46,7 +47,7 @@ public class UserService implements UserUseCase {
         User user = findById(userId);
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호: 비밀번호가 틀립니다.");
+            throw new UserException(UserErrorCode.USER_PASSWORD_INVALID);
         }
 
         user.updatePassword(passwordEncoder.encode(request.newPassword()));
