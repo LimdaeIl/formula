@@ -9,7 +9,6 @@ import lombok.Builder;
 public record GetUserResponse(
         Long userId,
         String email,
-        String name,
         String nickname,
         UserRole userRole,
         boolean isDelete,
@@ -21,7 +20,6 @@ public record GetUserResponse(
         return GetUserResponse.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .name(user.getName())
                 .nickname(user.getNickname())
                 .userRole(user.getUserRole())
                 .isDelete(user.getIsDelete())

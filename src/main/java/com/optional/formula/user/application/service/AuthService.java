@@ -6,6 +6,8 @@ import com.optional.formula.user.application.dto.response.SignUpResponse;
 import com.optional.formula.user.application.usecase.AuthUseCase;
 import com.optional.formula.user.domain.entity.User;
 import com.optional.formula.user.domain.repository.UserRepository;
+import com.optional.formula.user.exception.UserErrorCode;
+import com.optional.formula.user.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,12 +23,12 @@ public class AuthService implements AuthUseCase {
 
     private void findByEmail(String email) {
         userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("이메일: 존재하지 않는 이메일입니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_EMAIL_DUPLICATED));
     }
 
     private void existsByEmail(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("이메일: 이미 존재하는 이메일입니다.");
+            throw new UserException(UserErrorCode.USER_EMAIL_DUPLICATED);
         }
     }
 
@@ -39,7 +41,6 @@ public class AuthService implements AuthUseCase {
                 snowflake.nextId(),
                 request.email(),
                 passwordEncoder.encode(request.password()),
-                request.name(),
                 request.nickname()
         );
         userRepository.save(user);
