@@ -17,19 +17,19 @@ public class RefreshTokenRepository implements TokenRepository {
 
     @Override
     public void saveRefreshToken(Long userId, String refreshToken, long ttlMillis) {
-        String key = PREFIX_NAME + "RT:" + userId;
+        String key = PREFIX_NAME + "::RT::" + userId;
         redisTemplate.opsForValue().set(key, refreshToken, Duration.ofMillis(ttlMillis));
     }
 
     @Override
     public void setTokenBlacklist(Long userId, long ttlMillis) {
-        String key = PREFIX_NAME + "BL:" + userId;
+        String key = PREFIX_NAME + "::BL::" + userId;
         redisTemplate.opsForValue().set(key, "", Duration.ofMillis(ttlMillis));
     }
 
     @Override
     public void deleteRefreshToken(Long userId) {
-        String key = PREFIX_NAME + "RT:" + userId;
+        String key = PREFIX_NAME + "::RT::" + userId;
         redisTemplate.delete(key);
     }
 
