@@ -35,8 +35,26 @@ public class RefreshTokenRepository implements TokenRepository {
 
     @Override
     public Optional<String> getRefreshToken(Long userId) {
-        String key = PREFIX_NAME + "RT:" + userId;
+        String key = PREFIX_NAME + "::RT::" + userId;
         String token = redisTemplate.opsForValue().get(key);
         return Optional.ofNullable(token);
+    }
+
+    @Override
+    public void setEmailCode(String email, String code, Duration duration) {
+        String key = PREFIX_NAME + "::EC::" + email;
+        redisTemplate.opsForValue().set(key, code, duration);
+    }
+
+    @Override
+    public String getEmailCode(String email) {
+        String key = PREFIX_NAME + "::EC::" + email;
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public void deleteEmailCode(String email) {
+        String key = PREFIX_NAME + "::EC::" + email;
+        redisTemplate.delete(key);
     }
 }

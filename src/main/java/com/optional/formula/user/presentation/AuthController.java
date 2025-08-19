@@ -1,9 +1,12 @@
 package com.optional.formula.user.presentation;
 
 import com.optional.formula.user.application.dto.request.ReissueTokenRequest;
+import com.optional.formula.user.application.dto.request.SendEmailCodeRequest;
 import com.optional.formula.user.application.dto.request.SignInRequest;
 import com.optional.formula.user.application.dto.request.SignUpRequest;
+import com.optional.formula.user.application.dto.request.VerifyEmailCodeRequest;
 import com.optional.formula.user.application.dto.response.ReissueTokenResponse;
+import com.optional.formula.user.application.dto.response.SendEmailCodeResponse;
 import com.optional.formula.user.application.dto.response.SignInResponse;
 import com.optional.formula.user.application.dto.response.SignUpResponse;
 import com.optional.formula.user.application.usecase.AuthUseCase;
@@ -65,4 +68,25 @@ public class AuthController {
                 .body(response);
     }
 
+    @PostMapping("/send/email/code")
+    public ResponseEntity<SendEmailCodeResponse> sendEmailCode(
+            @Valid @RequestBody SendEmailCodeRequest request
+    ) {
+        SendEmailCodeResponse response = authUseCase.sendEmailCode(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @PostMapping("/verify/email/code")
+    public ResponseEntity<Void> verifyEmailCode(
+            @Valid @RequestBody VerifyEmailCodeRequest request
+    ) {
+        authUseCase.verifyEmailCode(request);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
 }

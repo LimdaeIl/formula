@@ -4,9 +4,12 @@ import com.optional.formula.common.exception.BusinessException;
 import com.optional.formula.common.jwt.JwtProvider;
 import com.optional.formula.common.snowflake.Snowflake;
 import com.optional.formula.user.application.dto.request.ReissueTokenRequest;
+import com.optional.formula.user.application.dto.request.SendEmailCodeRequest;
 import com.optional.formula.user.application.dto.request.SignInRequest;
 import com.optional.formula.user.application.dto.request.SignUpRequest;
+import com.optional.formula.user.application.dto.request.VerifyEmailCodeRequest;
 import com.optional.formula.user.application.dto.response.ReissueTokenResponse;
+import com.optional.formula.user.application.dto.response.SendEmailCodeResponse;
 import com.optional.formula.user.application.dto.response.SignInResponse;
 import com.optional.formula.user.application.dto.response.SignUpResponse;
 import com.optional.formula.user.application.usecase.AuthUseCase;
@@ -16,8 +19,13 @@ import com.optional.formula.user.domain.repository.UserRepository;
 import com.optional.formula.user.exception.UserErrorCode;
 import com.optional.formula.user.exception.UserException;
 import com.optional.formula.user.infrastructure.persistence.RefreshTokenRepository;
+import java.time.Duration;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +40,13 @@ public class AuthService implements AuthUseCase {
     private final Snowflake snowflake = new Snowflake();
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JavaMailSender mailSender;
+
+
+    @Value("${spring.mail.username}")
+    private String email;
+
+    private final Integer EMAIL_CODE_TIMEOUT = 3; // Minutes
 
     private void existsByEmail(String email) {
         if (userRepository.existsByEmail(email)) {
@@ -48,6 +63,24 @@ public class AuthService implements AuthUseCase {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new UserException(UserErrorCode.USER_PASSWORD_INVALID);
         }
+    }
+
+    private Integer generateRandomNumber() {
+        Random random = new Random();
+        StringBuilder randomNumber = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            randomNumber.append(random.nextInt(10));
+        }
+        return Integer.parseInt(randomNumber.toString());
+    }
+
+    private void send(String to, int code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setFrom(email);
+        message.setSubject("[Formula] 이메일 인증 코드");
+        message.setText("인증 코드: " + code + "\n" + EMAIL_CODE_TIMEOUT + "분 이내에 입력해 주세요.");
+        mailSender.send(message);
     }
 
     @Transactional
@@ -128,6 +161,35 @@ public class AuthService implements AuthUseCase {
                 jwtProvider.getRefreshTokenExpiation());
 
         return ReissueTokenResponse.from(AT, RT);
+    }
+
+    @Override
+    public void verifyEmailCode(VerifyEmailCodeRequest request) {
+        String getEmailCode = refreshTokenRepository.getEmailCode(request.email());
+        String inputCode = request.verifyCode().toString();
+
+        if (inputCode.isBlank()) {
+            throw new BusinessException(UserErrorCode.MALFORMED_CODE);
+        }
+
+        if (!inputCode.equals(getEmailCode)) {
+            throw new BusinessException(UserErrorCode.INVALID_CODE);
+        }
+
+        refreshTokenRepository.deleteEmailCode(request.email());
+    }
+
+    @Override
+    public SendEmailCodeResponse sendEmailCode(SendEmailCodeRequest request) {
+        String emailCode = refreshTokenRepository.getEmailCode(request.email());
+        log.info("emailCode : {}", emailCode);
+
+        Integer code = generateRandomNumber();
+        refreshTokenRepository.setEmailCode(request.email(), code.toString(), Duration.ofMinutes(EMAIL_CODE_TIMEOUT));
+
+        send(request.email(), code);
+
+        return new SendEmailCodeResponse("인증 코드가 전송되었습니다.");
     }
 
 
