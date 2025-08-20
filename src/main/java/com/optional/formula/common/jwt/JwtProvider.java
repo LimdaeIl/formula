@@ -75,7 +75,7 @@ public class JwtProvider {
         return claims.getExpiration().getTime() - System.currentTimeMillis();
     }
 
-    public String getRole(String token) {
+    public String getUserRole(String token) {
         Claims claims = extractClaims(token);
         return claims.get("USER_ROLE").toString();
     }

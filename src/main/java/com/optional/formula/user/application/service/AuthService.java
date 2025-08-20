@@ -165,7 +165,7 @@ public class AuthService implements AuthUseCase {
         verifyRefreshToken(request.refreshToken());
 
         Long userId = jwtProvider.getUserId(accessToken);
-        String role = jwtProvider.getRole(accessToken);
+        String role = jwtProvider.getUserRole(accessToken);
 
         String savedRT = refreshTokenRepository.getRefreshToken(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.INVALID_TOKEN));
