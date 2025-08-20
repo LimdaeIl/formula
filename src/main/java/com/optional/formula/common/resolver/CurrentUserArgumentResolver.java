@@ -3,6 +3,7 @@ package com.optional.formula.common.resolver;
 import com.optional.formula.common.exception.BusinessException;
 import com.optional.formula.common.exception.CommonErrorCode;
 import com.optional.formula.user.domain.entity.UserRole;
+import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -31,20 +32,20 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         String userId = webRequest.getHeader(USER_ID);
         String userRole = webRequest.getHeader(USER_ROLE);
         
-        if (userId == null || userRole == null) {
+        if (userId == null || userId.isBlank() || userRole == null || userRole.isBlank()) {
             throw new BusinessException(CommonErrorCode.UNAUTHORIZED);
         }
 
         try {
-            long id = Long.parseLong(userId);
+            long id = Long.parseLong(userId.trim());
 
             if (id <= 0) {
                 throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
             }
 
-            UserRole role = UserRole.valueOf(userRole);
+            UserRole role = UserRole.valueOf(userRole.trim().toUpperCase(Locale.ROOT));
             return CurrentUserInfo.of(id, role);
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
         }
     }
