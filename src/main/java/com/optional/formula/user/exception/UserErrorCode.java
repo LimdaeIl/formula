@@ -17,7 +17,9 @@ public enum UserErrorCode implements ErrorCode {
     INVALID_CODE("USER-006", "회원: 유효하지 않은 코드 번호입니다."),
     MALFORMED_CODE("USER-007", "회원: 이메일 코드 번호는 6자리입니다."),
 
-    EMAIL_SEND_FAIL("USER-008", "회원: 이메일 전송에 실패했습니다.");
+    EMAIL_SEND_FAIL("USER-008", "회원: 이메일 전송에 실패했습니다."),
+    INVALID_HEADER("USER-009", "회원: 유효하지 않은 헤더 정보입니다.");
+
 
     private final String code;
     private final String message;
