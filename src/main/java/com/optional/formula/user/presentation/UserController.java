@@ -1,9 +1,13 @@
 package com.optional.formula.user.presentation;
 
+import com.optional.formula.common.aop.PreAuthorizeUser;
+import com.optional.formula.common.resolver.CurrentUser;
+import com.optional.formula.common.resolver.CurrentUserInfo;
 import com.optional.formula.user.application.dto.request.UpdatePasswordUserRequest;
 import com.optional.formula.user.application.dto.response.GetUserResponse;
 import com.optional.formula.user.application.dto.response.UpdatePasswordUserResponse;
 import com.optional.formula.user.application.usecase.UserUseCase;
+import com.optional.formula.user.domain.entity.UserRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,10 +27,15 @@ public class UserController {
 
     private final UserUseCase userUseCase;
 
+    @PreAuthorizeUser(userRole = {UserRole.USER, UserRole.MANAGER, UserRole.ADMIN})
     @GetMapping("/{userId}")
     public ResponseEntity<GetUserResponse> getUser(
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @CurrentUser CurrentUserInfo info
     ) {
+        System.out.println("CurrentUserInfo.getUserId" + info.userId());
+        System.out.println("CurrentUserInfo.userRole" + info.userRole());
+
         GetUserResponse response = userUseCase.getUser(userId);
 
         return ResponseEntity

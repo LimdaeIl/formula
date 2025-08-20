@@ -13,4 +13,9 @@ public interface TokenRepository {
 
     Optional<String> getRefreshToken(Long userId);
 
+    void setEmailCode(String email, String code, Duration duration);
+
+    String getEmailCode(String email);
+
+    void deleteEmailCode(String email);
 }

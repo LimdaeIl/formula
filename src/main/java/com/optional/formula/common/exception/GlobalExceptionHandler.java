@@ -17,9 +17,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> businessExceptionHandler(BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
         log.warn("Business Exception: [{}] {}", errorCode.getCode(), errorCode.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of(errorCode));
+
+        HttpStatus status = switch (errorCode) {
+            case CommonErrorCode.UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+            case CommonErrorCode.ENTITY_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case CommonErrorCode.METHOD_NOT_ALLOWED -> HttpStatus.METHOD_NOT_ALLOWED;
+            default -> HttpStatus.BAD_REQUEST;
+        };
+
+        return ResponseEntity.status(status).body(ErrorResponse.of(errorCode));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
