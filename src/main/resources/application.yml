@@ -37,6 +37,12 @@ spring:
     secret: ${SECRET}
     access-token-expiration: ${ACCESS-TOKEN-EXPIRATION}
     refresh-token-expiration: ${REFRESH-TOKEN-EXPIRATION}
+    filter:
+      include-paths:
+        - /api/**
+      exclude-paths:
+        - /api/users/**
+
 
   mail:
     host: smtp.naver.com
