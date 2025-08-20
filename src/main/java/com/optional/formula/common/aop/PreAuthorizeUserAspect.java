@@ -4,7 +4,6 @@ import com.optional.formula.common.exception.BusinessException;
 import com.optional.formula.user.domain.entity.UserRole;
 import com.optional.formula.user.exception.UserErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Locale;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -36,23 +35,18 @@ public class PreAuthorizeUserAspect {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         if (attributes == null) {
-            log.info("ServletRequestAttributes 가 NULL 입니다.");
+            log.warn("ServletRequestAttributes is null");
             throw new BusinessException(UserErrorCode.INVALID_HEADER);
         }
 
         HttpServletRequest request = attributes.getRequest();
-        String userRole = request.getHeader(USER_ROLE);
+        Object userRoleAttr = request.getAttribute("X_USER_ROLE");
 
-        if (userRole == null || userRole.isEmpty()) {
-            log.info("User-Role 이 비어 있습니다.");
+        if (userRoleAttr == null || !(userRoleAttr instanceof UserRole)) {
+            log.warn("UserRole attribute is missing or invalid");
             throw new BusinessException(UserErrorCode.INVALID_HEADER);
         }
 
-        try {
-            return UserRole.valueOf(userRole.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            log.info("유효하지 않는 User-Role: {}", userRole);
-            throw new BusinessException(UserErrorCode.INVALID_HEADER);
-        }
+        return (UserRole) userRoleAttr;
     }
 }

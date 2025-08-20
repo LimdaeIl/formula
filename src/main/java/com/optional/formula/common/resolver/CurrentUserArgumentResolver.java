@@ -3,6 +3,7 @@ package com.optional.formula.common.resolver;
 import com.optional.formula.common.exception.BusinessException;
 import com.optional.formula.common.exception.CommonErrorCode;
 import com.optional.formula.user.domain.entity.UserRole;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
@@ -29,22 +30,19 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-        String userId = webRequest.getHeader(USER_ID);
-        String userRole = webRequest.getHeader(USER_ROLE);
-        
-        if (userId == null || userId.isBlank() || userRole == null || userRole.isBlank()) {
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+
+        Object userIdAttr = request.getAttribute("X_USER_ID");
+        Object userRoleAttr = request.getAttribute("X_USER_ROLE");
+
+        if (userIdAttr == null || userRoleAttr == null) {
             throw new BusinessException(CommonErrorCode.UNAUTHORIZED);
         }
+        long userId = (long) userIdAttr;
+        UserRole userRole = (UserRole) userRoleAttr;
 
         try {
-            long id = Long.parseLong(userId.trim());
-
-            if (id <= 0) {
-                throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
-            }
-
-            UserRole role = UserRole.valueOf(userRole.trim().toUpperCase(Locale.ROOT));
-            return CurrentUserInfo.of(id, role);
+            return CurrentUserInfo.of(userId, userRole);
         } catch (IllegalArgumentException e) {
             throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
         }
