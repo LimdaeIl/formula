@@ -70,17 +70,17 @@ public class AuthService implements AuthUseCase {
         }
     }
 
-    private Integer generateRandomNumber() {
+    private String generateVerificationCode() {
         Random random = new Random();
-        StringBuilder randomNumber = new StringBuilder();
+        StringBuilder code = new StringBuilder();
         for (int i = 0; i < 6; i++) {
-            randomNumber.append(random.nextInt(10));
+            code.append(random.nextInt(10)); // 0~9
         }
-        return Integer.parseInt(randomNumber.toString());
+        return code.toString(); // 예: "037192"
     }
 
 
-    private void send(String to, int code) {
+    private void send(String to, String code) {
         try {
             JavaMailSenderImpl senderImpl = (JavaMailSenderImpl) mailSender;
             MimeMessage mimeMessage = senderImpl.createMimeMessage();
@@ -95,7 +95,8 @@ public class AuthService implements AuthUseCase {
                     "code", code,
                     "timeout", EMAIL_CODE_TIMEOUT
             );
-            String htmlContent = mailTemplateService.buildEmailContent("email/email-verification", variables);
+            String htmlContent = mailTemplateService.buildEmailContent("email/email-verification",
+                    variables);
             helper.setText(htmlContent, true); // HTML 메일로 전송
 
             senderImpl.send(mimeMessage);
@@ -206,8 +207,8 @@ public class AuthService implements AuthUseCase {
         String emailCode = refreshTokenRepository.getEmailCode(request.email());
         log.info("emailCode : {}", emailCode);
 
-        Integer code = generateRandomNumber();
-        refreshTokenRepository.setEmailCode(request.email(), code.toString(),
+        String code = generateVerificationCode();
+        refreshTokenRepository.setEmailCode(request.email(), code,
                 Duration.ofMinutes(EMAIL_CODE_TIMEOUT));
 
         send(request.email(), code);
