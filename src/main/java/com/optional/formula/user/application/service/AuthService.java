@@ -19,13 +19,17 @@ import com.optional.formula.user.domain.repository.UserRepository;
 import com.optional.formula.user.exception.UserErrorCode;
 import com.optional.formula.user.exception.UserException;
 import com.optional.formula.user.infrastructure.persistence.RefreshTokenRepository;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +45,7 @@ public class AuthService implements AuthUseCase {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JavaMailSender mailSender;
+    private final MailTemplateService mailTemplateService;
 
 
     @Value("${spring.mail.username}")
@@ -65,22 +70,41 @@ public class AuthService implements AuthUseCase {
         }
     }
 
-    private Integer generateRandomNumber() {
+    private String generateVerificationCode() {
         Random random = new Random();
-        StringBuilder randomNumber = new StringBuilder();
+        StringBuilder code = new StringBuilder();
         for (int i = 0; i < 6; i++) {
-            randomNumber.append(random.nextInt(10));
+            code.append(random.nextInt(10)); // 0~9
         }
-        return Integer.parseInt(randomNumber.toString());
+        return code.toString(); // 예: "037192"
     }
 
-    private void send(String to, int code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setFrom(email);
-        message.setSubject("[Formula] 이메일 인증 코드");
-        message.setText("인증 코드: " + code + "\n" + EMAIL_CODE_TIMEOUT + "분 이내에 입력해 주세요.");
-        mailSender.send(message);
+
+    private void send(String to, String code) {
+        try {
+            JavaMailSenderImpl senderImpl = (JavaMailSenderImpl) mailSender;
+            MimeMessage mimeMessage = senderImpl.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+
+            helper.setTo(to);
+            helper.setFrom(new InternetAddress(email, "Formula"));
+            helper.setSubject("[Formula] 이메일 인증 코드");
+
+            // 타임리프 HTML 템플릿 처리
+            Map<String, Object> variables = Map.of(
+                    "code", code,
+                    "timeout", EMAIL_CODE_TIMEOUT
+            );
+            String htmlContent = mailTemplateService.buildEmailContent("email/email-verification",
+                    variables);
+            helper.setText(htmlContent, true); // HTML 메일로 전송
+
+            senderImpl.send(mimeMessage);
+
+        } catch (Exception e) {
+            log.error("이메일 발송 실패", e);
+            throw new BusinessException(UserErrorCode.EMAIL_SEND_FAIL);
+        }
     }
 
     @Transactional
@@ -150,7 +174,6 @@ public class AuthService implements AuthUseCase {
             throw new BusinessException(UserErrorCode.INVALID_TOKEN);
         }
 
-
         Long remainingTime = jwtProvider.getRemainingTime(savedRT);
         refreshTokenRepository.setTokenBlacklist(userId, remainingTime);
         refreshTokenRepository.deleteRefreshToken(userId);
@@ -184,8 +207,9 @@ public class AuthService implements AuthUseCase {
         String emailCode = refreshTokenRepository.getEmailCode(request.email());
         log.info("emailCode : {}", emailCode);
 
-        Integer code = generateRandomNumber();
-        refreshTokenRepository.setEmailCode(request.email(), code.toString(), Duration.ofMinutes(EMAIL_CODE_TIMEOUT));
+        String code = generateVerificationCode();
+        refreshTokenRepository.setEmailCode(request.email(), code,
+                Duration.ofMinutes(EMAIL_CODE_TIMEOUT));
 
         send(request.email(), code);
 
