@@ -47,17 +47,17 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("제외 경로에 해당하는 요청은 필터링하지 않는다 (shouldNotFilter)")
-    void shouldNotFilter_whenRequestUriIsExcluded() throws ServletException, IOException {
+    @DisplayName("shouldNotFilter()가 true를 반환하면 doFilterInternal은 호출되지 않는다")
+    void shouldNotFilter_true_means_doFilterIsBypassed() throws Exception {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/public/test");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        // when & then
-        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+        // when
+        jwtAuthenticationFilter.doFilter(request, response, filterChain);
 
-        // 필터를 통과해서 아무 일 없이 다음 필터로 넘어간다
-        verify(filterChain, times(1)).doFilter(request, response);
+        // then
+        verify(filterChain, times(1)).doFilter(request, response); // 통과는 하지만 필터 내부 로직은 실행되지 않음
     }
 
     @Test
@@ -101,6 +101,39 @@ class JwtAuthenticationFilterTest {
         // then
         assertThatThrownBy(
                 () -> jwtAuthenticationFilter.doFilterInternal(request, response, filterChain))
+                .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("Authorization 헤더가 없으면 필터는 사용자 정보 없이 통과시킨다")
+    void shouldPassWithoutUserAttributes_whenNoAuthorizationHeader() throws Exception {
+        // given
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/secure");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        // when
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        // then
+        assertThat(request.getAttribute("X_USER_ID")).isNull();
+        assertThat(request.getAttribute("X_USER_ROLE")).isNull();
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 역할일 경우 BusinessException(INVALID_ROLE_VALUE)을 던진다")
+    void shouldThrowBusinessException_whenInvalidRole() {
+        // given
+        String token = "valid.token.with.invalid.role";
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/secure");
+        request.addHeader("Authorization", "Bearer " + token);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(jwtProvider.getUserId(token)).thenReturn(1L);
+        when(jwtProvider.getUserRole(token)).thenReturn("NOT_A_ROLE");
+
+        // when & then
+        assertThatThrownBy(() -> jwtAuthenticationFilter.doFilterInternal(request, response, filterChain))
                 .isInstanceOf(BusinessException.class);
     }
 }

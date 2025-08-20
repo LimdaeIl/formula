@@ -1,0 +1,61 @@
+### 이메일 코드 전송
+POST http://localhost:8080/api/v1/auth/send/email/code
+Content-Type: application/json
+
+{
+  "email": "optional94@naver.com"
+}
+
+### 이메일 코드 인증
+POST http://localhost:8080/api/v1/auth/verify/email/code
+Content-Type: application/json
+
+{
+  "email": "optional94@naver.com",
+  "verifyCode": 0
+}
+
+### 회원가입
+POST http://localhost:8080/api/v1/auth/sign-up
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123!",
+  "nickname": "testNickname"
+}
+
+### 로그인
+POST http://localhost:8080/api/v1/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123!"
+}
+
+> {%
+  client.global.set("accessToken", response.body.accessToken);
+  client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### 로그아웃
+POST http://localhost:8080/api/v1/auth/logout
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer {{accessToken}}
+
+
+### 토큰 재발급
+POST http://localhost:8080/api/v1/auth/reissue-token
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.accessToken);
+  client.global.set("refreshToken", response.body.refreshToken);
+%}
+
