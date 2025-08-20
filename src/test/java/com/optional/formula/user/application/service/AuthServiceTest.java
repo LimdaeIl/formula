@@ -175,7 +175,7 @@ class AuthServiceTest {
         long remainingTime = 3600000L; // 1시간
 
         given(jwtProvider.getUserId(accessToken)).willReturn(userId);
-        given(jwtProvider.getRole(accessToken)).willReturn("USER");
+        given(jwtProvider.getUserRole(accessToken)).willReturn("USER");
         given(refreshTokenRepository.getRefreshToken(userId)).willReturn(Optional.of(savedRefreshToken));
         given(jwtProvider.getRemainingTime(savedRefreshToken)).willReturn(remainingTime);
         given(jwtProvider.generateAccessToken(userId, testUser.getUserRole())).willReturn(newAccessToken);
@@ -192,7 +192,7 @@ class AuthServiceTest {
 
         // verify
         verify(jwtProvider).getUserId(accessToken);
-        verify(jwtProvider).getRole(accessToken);
+        verify(jwtProvider).getUserRole(accessToken);
         verify(refreshTokenRepository).getRefreshToken(userId);
         verify(jwtProvider).getRemainingTime(savedRefreshToken);
         verify(refreshTokenRepository).setTokenBlacklist(userId, remainingTime);
@@ -229,7 +229,7 @@ class AuthServiceTest {
         ReissueTokenRequest wrongRequest = new ReissueTokenRequest(wrongRefreshToken);
 
         given(jwtProvider.getUserId(accessToken)).willReturn(userId);
-        given(jwtProvider.getRole(accessToken)).willReturn("USER");
+        given(jwtProvider.getUserRole(accessToken)).willReturn("USER");
         given(refreshTokenRepository.getRefreshToken(userId)).willReturn(Optional.of(refreshToken));
 
         // when & then
@@ -247,7 +247,7 @@ class AuthServiceTest {
     void reissueToken_fail_when_rt_not_found() {
         // given
         given(jwtProvider.getUserId(accessToken)).willReturn(userId);
-        given(jwtProvider.getRole(accessToken)).willReturn("USER");
+        given(jwtProvider.getUserRole(accessToken)).willReturn("USER");
         given(refreshTokenRepository.getRefreshToken(userId)).willReturn(Optional.empty());
 
         // when & then
