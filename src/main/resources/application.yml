@@ -41,7 +41,7 @@ spring:
       include-paths:
         - /api/**
       exclude-paths:
-        - /api/users/**
+        - /api/v1/auth/**
 
 
   mail:
@@ -62,3 +62,8 @@ spring:
           timeout: ${TIMEOUT}
           writeTimeout: ${TIMEOUT}
         debug: true
+
+logging:
+  level:
+    com.optional.formula.common.filter.JwtAuthenticationFilter: DEBUG
+    com.optional.formula.common.resolver.CurrentUserArgumentResolver: DEBUG

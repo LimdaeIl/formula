@@ -4,7 +4,6 @@ import com.optional.formula.common.exception.BusinessException;
 import com.optional.formula.common.exception.CommonErrorCode;
 import com.optional.formula.user.domain.entity.UserRole;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -16,9 +15,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Slf4j(topic = "CurrentUserArgumentResolver")
 @Component
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
-
-    private static final String USER_ID = "X-USER-ID";
-    private static final String USER_ROLE = "X-USER-ROLE";
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
