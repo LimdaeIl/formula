@@ -8,7 +8,7 @@ import lombok.Builder;
 public record GetCategoryResponse(
         String name,
         String description,
-        String isDelete,
+        Boolean isDelete,
         LocalDateTime createdAt,
         Long createdBy,
         LocalDateTime updatedAt,

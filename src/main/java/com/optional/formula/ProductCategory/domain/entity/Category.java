@@ -24,7 +24,7 @@ public class Category {
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
-    @Column(name = "description", length = 500, nullable = false)
+    @Column(name = "description", length = 500)
     private String description;
 
     @Column(name = "is_delete")
