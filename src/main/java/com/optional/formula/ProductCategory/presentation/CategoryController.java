@@ -10,6 +10,7 @@ import com.optional.formula.common.aop.PreAuthorizeUser;
 import com.optional.formula.common.resolver.CurrentUser;
 import com.optional.formula.common.resolver.CurrentUserInfo;
 import com.optional.formula.user.domain.entity.UserRole;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CreateCategoryResponse> createCategory(
             @CurrentUser CurrentUserInfo info,
-            @RequestBody CreateCategoryRequest request
+            @RequestBody @Valid CreateCategoryRequest request
     ) {
 
         CreateCategoryResponse response = categoryUseCase.createCategory(info, request);
@@ -61,7 +62,7 @@ public class CategoryController {
     public ResponseEntity<UpdateCategoryResponse> updateCategory(
             @CurrentUser CurrentUserInfo info,
             @PathVariable Long categoryId,
-            @RequestBody UpdateCategoryRequest request
+            @RequestBody @Valid UpdateCategoryRequest request
     ) {
         UpdateCategoryResponse response = categoryUseCase.UpdateCategory(info, categoryId, request);
 

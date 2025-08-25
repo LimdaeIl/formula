@@ -11,7 +11,7 @@ public record UpdateCategoryResponse(
         Boolean isDelete,
         LocalDateTime createdAt,
         Long createdBy,
-        LocalDateTime UpdatedAt,
+        LocalDateTime updatedAt,
         Long updatedBy
 ) {
 
@@ -22,7 +22,7 @@ public record UpdateCategoryResponse(
                 .isDelete(category.getIsDelete())
                 .createdAt(category.getCreatedAt())
                 .createdBy(category.getCreatedBy())
-                .UpdatedAt(category.getUpdatedAt())
+                .updatedAt(category.getUpdatedAt())
                 .updatedBy(category.getUpdatedBy())
                 .build();
     }
