@@ -1,0 +1,60 @@
+### 회원가입
+POST http://localhost:8080/api/v1/auth/sign-up
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123!",
+  "nickname": "testNickname"
+}
+
+### 로그인
+POST http://localhost:8080/api/v1/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123!"
+}
+
+> {%
+  client.global.set("accessToken", response.body.accessToken);
+  client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+
+### 카테고리 생성
+POST http://localhost:8080/api/v1/categories
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "testCategory",
+  "description": "testCategory"
+}
+
+> {%
+  client.global.set("categoryId", response.body.categoryId.toFixed(0));
+%}
+
+### 카테고리 조회
+GET http://localhost:8080/api/v1/categories/{{categoryId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+
+### 카테고리 수정(이름, 설명)
+PATCH http://localhost:8080/api/v1/categories/{{categoryId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "updateTestCategory",
+  "description": "updateTestCategory"
+}
+
+### 카테고리 소프트 삭제
+DELETE http://localhost:8080/api/v1/categories/{{categoryId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
