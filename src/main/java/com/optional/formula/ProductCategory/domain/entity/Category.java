@@ -72,7 +72,7 @@ public class Category {
         this.description = newDescription;
     }
 
-    public void updatedAt(Long userId) {
+    public void updateCategory(Long userId) {
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }

@@ -69,7 +69,7 @@ public class CategoryService implements CategoryUseCase {
 
         category.updateName(request.name());
         category.updateDescription(request.description());
-        category.updatedAt(info.userId());
+        category.updateCategory(info.userId());
 
         Category savedCategory = categoryRepository.save(category);
 
@@ -82,7 +82,7 @@ public class CategoryService implements CategoryUseCase {
         Category category = findByCategoryId(categoryId);
 
         category.softDelete(info.userId());
-        category.updatedAt(info.userId());
+        category.updateCategory(info.userId());
 
         categoryRepository.save(category);
     }
